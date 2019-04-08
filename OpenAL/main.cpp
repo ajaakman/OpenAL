@@ -1,3 +1,14 @@
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#include <functional>
+
+static void dispatch_main(void* fp)
+{
+	std::function<void()>* func = (std::function<void()>*)fp;
+	(*func)();
+}
+#endif
+
 //http://www.youtube.com/user/thecplusplusguy
 //Playing 3D sound with OpenAL, and loading a wav file manually
 #include <iostream>
@@ -100,10 +111,16 @@ int main(int argc, char** argv)
 	alSourcei(sourceid, AL_BUFFER, bufferid);
 	alSourcePlay(sourceid);
 
-	while (true)
-	{
+#ifdef __EMSCRIPTEN__
+	std::function<void()> mainLoop = [&]() {
+#else
+	while (1) {
+#endif
 
 	}
+#ifdef __EMSCRIPTEN__
+	; emscripten_set_main_loop_arg(dispatch_main, &mainLoop, 0, 1);
+#endif
 
 	alDeleteSources(1, &sourceid);
 	alDeleteBuffers(1, &bufferid);

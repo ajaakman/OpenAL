@@ -1,0 +1,1 @@
+emcc -std=c++11 "main.cpp" -lopenal --embed-file loop.wav -O3 -o Web/WebGl.html
