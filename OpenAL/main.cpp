@@ -65,9 +65,15 @@ char* loadWAV(const char* path, int* channels, int* samplerate, int* bps, int* s
 	in.read(data, *size);
 
 	if (*channels == 1)
+	{
+		std::cout << "MONO Audio File\n";
 		*alformat = (*bps == 8 ? AL_FORMAT_MONO8 : AL_FORMAT_MONO16);
-	else 
+	}
+	else
+	{
+		std::cout << "MONO Audio File\n";
 		*alformat = (*bps == 8 ? AL_FORMAT_STEREO8 : AL_FORMAT_STEREO16);	
+	}
 
 	return data;
 }
@@ -88,6 +94,8 @@ int main(int argc, char** argv)
 		return 0;
 	}
 	alcMakeContextCurrent(context);
+	// Distance Model
+	alDistanceModel(AL_EXPONENT_DISTANCE);	
 	// Loading WAV
 	int channel, sampleRate, bps, size;
 	unsigned format;
@@ -102,17 +110,25 @@ int main(int argc, char** argv)
 	alListener3f(AL_VELOCITY, 0, 0, 0);
 	alListenerfv(AL_ORIENTATION, listenerOri);
 	// Create Source
-	unsigned int sourceid;
+	unsigned sourceid;
 	alGenSources(1, &sourceid);
 	alSourcei(sourceid, AL_BUFFER, bufferid); // Bind Buffer
-	alSourcei(sourceid, AL_LOOPING, AL_FALSE);
+	alSourcei(sourceid, AL_LOOPING, AL_TRUE);
 	alSourcef(sourceid, AL_PITCH, 1);
 	alSourcef(sourceid, AL_GAIN, 1);
-	alSource3f(sourceid, AL_POSITION, 0, 0, 0);
+	alSource3f(sourceid, AL_POSITION, 5.f, 0, 0);
 	alSource3f(sourceid, AL_VELOCITY, 0, 0, 0);
+
+	alSourcef(sourceid, AL_ROLLOFF_FACTOR, 0.1f);
+	alSourcef(sourceid, AL_REFERENCE_DISTANCE, 1.f);
+	alSourcef(sourceid, AL_MAX_DISTANCE, 10.f);
+
+	alSourcePlay(sourceid);
+	alSourcePause(sourceid);
+	alSourcePlay(sourceid);
+	alSourceStop(sourceid);
 	alSourcePlay(sourceid);
 	// Checking State
-
 	ALint source_state;
 	alGetSourcei(sourceid, AL_SOURCE_STATE, &source_state);
 #ifdef __EMSCRIPTEN__
